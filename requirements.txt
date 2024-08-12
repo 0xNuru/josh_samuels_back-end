@@ -1,0 +1,14 @@
+fastapi[standard]==0.112.0
+
+#auth
+# auth
+passlib[bcrypt] 
+
+# data validation
+pydantic
+pydantic-settings
+
+# database
+sqlalchemy==1.4.46
+psycopg2-binary
+
