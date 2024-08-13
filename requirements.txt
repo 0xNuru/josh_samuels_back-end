@@ -13,3 +13,11 @@ pydantic-settings
 sqlalchemy==1.4.46
 psycopg2-binary
 
+#email
+fastapi-mail
+
+# templating syntax
+jinja2
+
+#ASGI server
+gunicorn
