@@ -1,8 +1,9 @@
 fastapi[standard]==0.112.0
 
-#auth
 # auth
+itsdangerous
 passlib[bcrypt] 
+python-jose[cryptography]
 
 # data validation
 pydantic
