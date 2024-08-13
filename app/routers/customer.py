@@ -6,13 +6,14 @@ from sqlalchemy.orm import Session
 from app.engine.load import load
 from app.models.user import User
 from app.models.customer import Customer
-from app.schema.customer import CreateCustomer, ShowCustomer
+from app.schema.customer import CreateCustomer
 from app.utils import auth
+
 
 
 router = APIRouter(prefix="/customer", tags=["Customer Management"])
 
-@router.post("/register", response_model=ShowCustomer, status_code=status.HTTP_201_CREATED)
+@router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(request: CreateCustomer, http_request: Request, db: Session = Depends(load)):
     """
     Registers a new customer user.
