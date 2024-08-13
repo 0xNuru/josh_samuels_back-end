@@ -6,6 +6,8 @@ from pydantic import BaseModel, EmailStr, SecretStr, model_validator
 
 
 class CreateCustomer(BaseModel):
+    first_name: str
+    last_name: str
     email: EmailStr
     phone: str
     password1: SecretStr

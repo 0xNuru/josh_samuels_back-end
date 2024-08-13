@@ -53,13 +53,19 @@ async def register(request: CreateCustomer, http_request: Request, db: Session =
             detail=[{"msg": f"user with email: {email} exists"}],
         )
     password_hash = auth.get_password_hash(request.password1.get_secret_value())
-    # message = await send_verification_mail(email, http_request, request)
+    message = await auth.send_verification_mail(email, http_request, request)
 
     new_customer = Customer(
+        first_name=request.first_name,
+        last_name=request.last_name,
         phone=request.phone,
         email=request.email,
         password_hash=password_hash,
         role="customer",
     )
     db.add(new_customer)
-    return new_customer
+    return {
+        "first_name": request.first_name,
+        "email": email,
+        "message": message
+        }
