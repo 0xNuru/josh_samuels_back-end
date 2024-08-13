@@ -2,6 +2,8 @@
 """sets environment variable using pydantic BaseSettings"""
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import EmailStr
+
 
 from dotenv import load_dotenv 
 
@@ -17,6 +19,19 @@ class Settings(BaseSettings):
     DB_NAME: str
     DB_HOST: str
     DB_PORT: str
+
+    #JWT
+    JWT_SECRET_KEY: str
+    JWT_ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    REFRESH_TOKEN_EXPIRE_MINUTES: int
+
+    #  email settings
+    EMAIL_HOST: str
+    EMAIL_PORT: str
+    EMAIL_USERNAME: str
+    EMAIL_PASSWORD: str
+    EMAIL_FROM: EmailStr
 
 settings = Settings()
 
