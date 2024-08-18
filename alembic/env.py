@@ -9,7 +9,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.models.base_model import Base
-from app.models import customer, user
+from app.models import customer, user, measurements
 
 
 load_dotenv()
