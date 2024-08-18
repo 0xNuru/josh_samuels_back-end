@@ -70,7 +70,7 @@ async def send_verification_mail(email, http_request, request):
         # save generated token with email in a cache
         # json_cache.set(token, email)
 
-        verification_url =  f"https://josh-samuels-back-end.onrender.com/docs/auth/verify_email/{token}"
+        verification_url =  f"https://josh-samuels-back-end.onrender.com/auth/verify_email/{token}"
         # token_url =  f"{http_request.url.scheme}://{http_request.client.host}:{http_request.url.port}/auth/verifyemail/{token}"
         await Email(request.first_name, verification_url, [email]).send_mail("Your Verification Link", "verification")
 
