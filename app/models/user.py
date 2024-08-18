@@ -6,8 +6,6 @@ from app.models.base_model import BaseModel, Base
 
 
 class User(BaseModel, Base):
-    """users table"""
-
     __tablename__ = "users"
     email = Column(String(32), unique=True, nullable=False)
     phone: str = Column(String(32), unique=True, nullable=False)
