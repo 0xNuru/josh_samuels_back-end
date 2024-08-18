@@ -86,11 +86,11 @@ def verify_email(token: str, db: Session = Depends(load)):
         user = db.query_eng(User).filter(
             User.email == email).first()
         if user is None:
-            return RedirectResponse(url="wahealth.co.uk/expired")
+            return RedirectResponse(url="https://josh-samuels-back-end.onrender.com/")
         user.is_verified = True
         db.update(user)
         
-    return  RedirectResponse(url="https://wahealth.co.uk/templates/verified.html")
+    return  RedirectResponse(url="https://josh-samuels-back-end.onrender.com/auth/verify_email")
 
 @router.get("/resened_verification_mail")
 async def resend_verification_mail(http_request: Request, email: EmailStr, db: Session = Depends(load)):
