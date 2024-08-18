@@ -2,7 +2,8 @@
 
 import enum
 
-from sqlalchemy import Column, Enum, ForeignKey, String, Boolean, LargeBinary
+from sqlalchemy import Column, Enum, ForeignKey, String, LargeBinary
+from sqlalchemy.orm import relationship
 
 from app.models.user import User
 
@@ -20,4 +21,6 @@ class Customer(User):
     address: str = Column(String(256), nullable=True)
     image = Column(LargeBinary, nullable=True)
     image_header = Column(String, nullable=True)
+
+    measurement = relationship("Measurement", back_populates="customer")
 

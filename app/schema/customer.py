@@ -44,3 +44,28 @@ class CreateCustomer(BaseModel):
 
 class ShowCustomer(BaseModel):
     email: EmailStr
+
+class UpdateMeasurement(BaseModel):
+    round_head: float = None
+    neck: float = None
+    shoulder: float = None
+    sleeve: float = None
+    flexed_biceps: float = None
+    wrist: float = None
+    back: float = None
+    front_chest: float = None
+    chest: float = None
+    stomach: float = None
+    hip: float = None
+    waist: float = None
+    crotch: float = None
+    thigh: float = None
+    knee: float = None
+    ankle: float = None
+    pant_length: float = None
+    inseam: float = None
+    # front_view_image: str = None
+    # side_view_image: str = None
+
+    class Config:
+        from_attributes = True

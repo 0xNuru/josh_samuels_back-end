@@ -1,12 +1,16 @@
 #!/usr/bin/env python3
 
+import base64
+import binascii
+
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
 from app.engine.load import load
+from app.models.measurements import Measurement
 from app.models.user import User
 from app.models.customer import Customer
-from app.schema.customer import CreateCustomer
+from app.schema.customer import CreateCustomer, UpdateMeasurement
 from app.utils import auth
 
 
@@ -70,3 +74,31 @@ async def register(request: CreateCustomer, http_request: Request, db: Session =
         "email": email,
         "message": message
         }
+
+@router.patch("/update_measurement", status_code=status.HTTP_200_OK)
+def update_measurement(request: UpdateMeasurement, db: Session = Depends(load), user: User = Depends(auth.get_current_user)):
+    measurements = db.query_eng(Measurement).filter(Measurement.customer_id == user.id).first()
+    if measurements:
+        for key, value in request.model_dump(exclude_unset=True).items():
+            if value not in (None, ""):
+                if key == "image":
+                    if value.startswith('data:image') and ';base64,' in value:
+                        header, value = value.split(';base64,')
+                    # convert base64 image to binary
+                    try:
+                        value = base64.b64decode(value)
+                        setattr(measurements, "image_header", header)
+                    except binascii.Error:
+                        raise HTTPException(
+                            status_code=400, detail=[{"msg": "Invalid base64-encoded string for image"}]
+                        )
+                setattr(measurements, key, value)        
+        db.add(measurements)
+        return (measurements)
+    else:
+        new_measurements = Measurement(
+            customer_id=user.id,
+            **request.model_dump()
+        )
+        db.add(new_measurements)
+        return (new_measurements)
