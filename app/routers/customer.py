@@ -20,8 +20,6 @@ router = APIRouter(prefix="/customer", tags=["Customer Management"])
 @router.post("/register", status_code=status.HTTP_201_CREATED)
 async def register(request: CreateCustomer, http_request: Request, db: Session = Depends(load)):
     """
-    Registers a new customer user.
-
     Parameters:
     - request (CreateCustomer): An object containing the details of the new admin user.
     - db (Session): A database session object.
@@ -77,6 +75,24 @@ async def register(request: CreateCustomer, http_request: Request, db: Session =
 
 @router.patch("/update_measurement", status_code=status.HTTP_200_OK)
 def update_measurement(request: UpdateMeasurement, db: Session = Depends(load), user: User = Depends(auth.get_current_user)):
+    """
+    Parameters:
+    - request (UpdateMeasurement): An object containing the updated measurement details.
+    - db (Session): A database session object.
+    - user (User): The current user object.
+
+    Returns:
+    - Measurement: An object containing the updated measurement details.
+
+    This function first checks if a measurement record exists for the current user. 
+    If a record exists, it updates the existing record with the provided details. 
+    If no record exists, it creates a new measurement record for the user.
+
+    If the 'image' field is provided in the request, the function checks if the value is a valid base64-encoded image. 
+    If it is, the function converts the base64 string to binary and stores the image header separately.
+
+    If any error occurs during the process, an HTTPException is raised with an appropriate status code and error message.
+    """
     measurements = db.query_eng(Measurement).filter(Measurement.customer_id == user.id).first()
     if measurements:
         for key, value in request.model_dump(exclude_unset=True).items():
