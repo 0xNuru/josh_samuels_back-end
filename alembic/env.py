@@ -9,7 +9,7 @@ from sqlalchemy import pool
 from alembic import context
 
 from app.models.base_model import Base
-from app.models import customer, user, measurements
+from app.models import customer, user, measurements, product, cart
 
 
 load_dotenv()
@@ -68,14 +68,12 @@ def run_migrations_online() -> None:
 
     """
     url = config.get_main_option("sqlalchemy.url")
-    url = url.replace('${DB_URL}', os.getenv('DB_URL'))
+    url = url.replace("${DB_URL}", os.getenv("DB_URL"))
 
     connectable = create_engine(url)
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

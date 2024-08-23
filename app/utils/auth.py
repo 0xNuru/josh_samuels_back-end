@@ -18,8 +18,9 @@ from .cookies import OAuth2PasswordBearerWithCookie
 
 
 # used to serialize/deserialze a url-safe time-sensitive token for email verification.
-verification_serializer = URLSafeTimedSerializer(settings.JWT_SECRET_KEY,
-                                   salt='verification')
+verification_serializer = URLSafeTimedSerializer(
+    settings.JWT_SECRET_KEY, salt="verification"
+)
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearerWithCookie(tokenUrl="/auth/token")
 
@@ -44,6 +45,7 @@ def get_password_hash(password: str) -> str:
     hash: str = pwd_context.hash(password)
     return hash
 
+
 def generate_token(email: List[EmailStr]) -> str:
     """
     Generates a unique token for email verification.
@@ -62,7 +64,8 @@ def generate_token(email: List[EmailStr]) -> str:
         return _token
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
-    
+
+
 async def send_verification_mail(email, http_request, request):
     try:
         token = generate_token(email)
@@ -70,16 +73,20 @@ async def send_verification_mail(email, http_request, request):
         # save generated token with email in a cache
         # json_cache.set(token, email)
 
-        verification_url =  f"https://api.joshsamuels.co/auth/verify_email/{token}"
+        verification_url = f"https://api.joshsamuels.co/auth/verify_email/{token}"
         # token_url =  f"{http_request.url.scheme}://{http_request.client.host}:{http_request.url.port}/auth/verifyemail/{token}"
-        await Email(request.first_name, verification_url, [email]).send_mail("Your Verification Link", "verification")
+        await Email(request.first_name, verification_url, [email]).send_mail(
+            "Your Verification Link", "verification"
+        )
 
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                            detail=[{"msg":f"{e}"}])
-    
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=[{"msg": f"{e}"}]
+        )
+
     return "Verification email sent successfully"
-    
+
+
 def verify_token(token: str) -> dict:
     """
     Verifies the given token and returns the associated email address along with a 'verified' flag.
@@ -105,7 +112,8 @@ def verify_token(token: str) -> dict:
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
-    return {'email':email, 'verified': True}
+    return {"email": email, "verified": True}
+
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
@@ -127,6 +135,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     verified: bool = pwd_context.verify(plain_password, hashed_password)
     return verified
+
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     """
@@ -155,14 +164,15 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     )
     return encoded_jwt
 
+
 def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(load)):
     """
     Retrieve the current user based on the provided access token.
 
     Parameters:
-    token (str, optional): The access token to be used for authentication. 
+    token (str, optional): The access token to be used for authentication.
     If not provided, the function will use the token provided by the OAuth2PasswordBearerWithCookie.
-    db (Session, optional): The database session object to be used for querying the user. 
+    db (Session, optional): The database session object to be used for querying the user.
     If not provided, the function will use the session object provided by the load function.
 
     Returns:
@@ -172,9 +182,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
     HTTPException: If the access token is not valid or the user does not exist in the database.
 
     Note:
-    This function decodes the access token using the JWT library, retrieves the username from the payload, 
+    This function decodes the access token using the JWT library, retrieves the username from the payload,
     and queries the database to find the corresponding user.
-    If the access token is not valid or the user does not exist, 
+    If the access token is not valid or the user does not exist,
     an HTTPException is raised with appropriate error details.
     """
     credentials_exception = HTTPException(
@@ -198,15 +208,17 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
 
 
 def check_authorization(required_role: str):
-    def get_current_role(token: str = Depends(oauth2_scheme), db: Session = Depends(load)):
+    def get_current_role(
+        token: str = Depends(oauth2_scheme), db: Session = Depends(load)
+    ):
         """
         Retrieve the current user based on the provided access token and check thier role.
 
         Parameters:
         role (str): The role we want to match.
-        token (str, optional): The access token to be used for authentication. 
+        token (str, optional): The access token to be used for authentication.
         If not provided, the function will use the token provided by the OAuth2PasswordBearerWithCookie.
-        db (Session, optional): The database session object to be used for querying the user. 
+        db (Session, optional): The database session object to be used for querying the user.
         If not provided, the function will use the session object provided by the load function.
 
         Returns:
@@ -216,9 +228,9 @@ def check_authorization(required_role: str):
         HTTPException: If the access token is not valid or the user does not exist in the database.
 
         Note:
-        This function decodes the access token using the JWT library, retrieves the username from the payload, 
+        This function decodes the access token using the JWT library, retrieves the username from the payload,
         and queries the database to find the corresponding user.
-        If the access token is not valid or the user does not exist, 
+        If the access token is not valid or the user does not exist,
         an HTTPException is raised with appropriate error details.
         """
         credentials_exception = HTTPException(
@@ -241,10 +253,13 @@ def check_authorization(required_role: str):
         if user is None:
             raise credentials_exception
         return user
+
     return get_current_role
 
 
-def authenticate_user(username: str, password: str, db: Session = Depends(load)) -> User | bool:
+def authenticate_user(
+    username: str, password: str, db: Session = Depends(load)
+) -> User | bool:
     """
     Authenticate a user based on their username and password.
 
@@ -297,6 +312,7 @@ def set_access_cookies(token: str, response: Response):
         httponly=True,
         samesite="none",
     )
+
 
 def delete_access_cookies(response: Response):
     """
@@ -366,4 +382,3 @@ def get_current_user_from_cookie(request: Request, db: Session = Depends(load)) 
     if user is None:
         raise credentials_exception
     return user
-

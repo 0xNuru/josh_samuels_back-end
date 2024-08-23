@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import customer, auth
+from app.routers import customer, auth, product
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -13,9 +13,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/")
 def hello():
     return {"message": "Hello, World!"}
 
+
 app.include_router(customer.router)
 app.include_router(auth.router)
+app.include_router(product.router)
