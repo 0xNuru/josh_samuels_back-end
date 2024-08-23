@@ -292,7 +292,7 @@ def set_access_cookies(token: str, response: Response):
         expires=datetime.now(timezone.utc)
         + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
         path="/",
-        domain="",
+        domain="joshsamuels.co",
         secure=True,
         httponly=True,
         samesite="none",
@@ -320,7 +320,7 @@ def delete_access_cookies(response: Response):
         key="access_token",
         value="",
         path="/",
-        domain="",
+        domain="joshsamuels.co",
         secure=True,
         httponly=True,
         samesite="none",
