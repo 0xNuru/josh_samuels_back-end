@@ -10,7 +10,7 @@ app.add_middleware(
     allow_origins=[
         "https://joshsamuels.co",
         "https://www.joshsamuels.co",
-        "https://dev.joshsamuels.co/",
+        "https://dev.joshsamuels.co",
     ],
     allow_credentials=True,
     allow_methods=["*"],
