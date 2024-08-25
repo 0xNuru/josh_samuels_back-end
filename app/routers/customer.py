@@ -11,7 +11,12 @@ from app.models.measurements import Measurement
 from app.models.user import User
 from app.models.cart import Cart  # This is to avoid sqlalchemy.exc.InvalidRequestError
 from app.models.customer import Customer
-from app.schema.customer import CreateCart, CreateCustomer, UpdateMeasurement
+from app.schema.customer import (
+    CreateCart,
+    CreateCustomer,
+    ShowCustomer,
+    UpdateMeasurement,
+)
 from app.utils import auth
 
 
@@ -135,3 +140,24 @@ def add_product(
     )
     db.add(new_product)
     return new_product
+
+
+@router.get("/profile", response_model=ShowCustomer, status_code=status.HTTP_200_OK)
+def get_profile(
+    db: Session = Depends(load), user: User = Depends(auth.get_current_user)
+):
+    """
+    Parameters:
+    - db (Session): A database session object.
+    - user (User): The current user object.
+
+    Returns:
+    - User: An object containing the current user's profile details.
+
+    This function retrieves the user's profile details from the database using the provided user object.
+    """
+    customer = db.query_eng(Customer).filter(Customer.id == user.id).first()
+    return {
+        **user.__dict__,
+        **customer.__dict__,
+    }

@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
 import re
+from datetime import date
 
 from pydantic import BaseModel, EmailStr, SecretStr, model_validator
+
+from app.models.customer import GenderEnum
 
 
 class CreateCustomer(BaseModel):
@@ -43,7 +46,12 @@ class CreateCustomer(BaseModel):
 
 
 class ShowCustomer(BaseModel):
+    first_name: str
+    last_name: str
     email: EmailStr
+    phone: str
+    gender: GenderEnum | None
+    date_of_birth: date | None
 
 
 class UpdateMeasurement(BaseModel):
