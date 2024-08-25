@@ -81,16 +81,16 @@ def verify_email(token: str, db: Session = Depends(load)):
         # call the function that cleans in async way
         # clean_db()
         # token has expired
-        return RedirectResponse(url="dev.joshsamuels.co/error")
+        return RedirectResponse(url="dev.joshsamuels.co/signup/error")
     else:
         email = result["email"]
         user = db.query_eng(User).filter(User.email == email).first()
         if user is None:
-            return RedirectResponse(url="https://dev.joshsamuels.co/error")
+            return RedirectResponse(url="https://dev.joshsamuels.co/signup/error")
         user.is_verified = True
         db.update(user)
 
-    return RedirectResponse(url="https://dev.joshsamuels.co/success")
+    return RedirectResponse(url="https://dev.joshsamuels.co/signup/success")
 
 
 @router.get("/resened_verification_mail")
