@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import List
 
 
 class CreateProduct(BaseModel):
@@ -6,8 +7,7 @@ class CreateProduct(BaseModel):
     price: float
     description: str
     category: str
-    stock_quantity: int
-    # product_image: str
+    images: List[str]
 
     class Config:
         from_attributes = True

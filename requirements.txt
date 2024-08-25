@@ -21,3 +21,6 @@ jinja2
 
 #ASGI server
 gunicorn
+
+#AWS SDK for Python
+boto3
