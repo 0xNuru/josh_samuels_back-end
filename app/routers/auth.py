@@ -18,13 +18,14 @@ from app.utils.auth import (
     create_access_token,
     get_current_user,
     set_access_cookies,
-    delete_access_cookies
+    delete_access_cookies,
 )
 from app.utils.emails import Email
 from app.utils.auth import send_verification_mail, verify_token
 
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
 
 @router.post("/token")
 def login(
@@ -79,21 +80,23 @@ def verify_email(token: str, db: Session = Depends(load)):
         # to do remove user details if existing
         # call the function that cleans in async way
         # clean_db()
-        #token has expired
-        return RedirectResponse(url="joshsamuels.co/error")
+        # token has expired
+        return RedirectResponse(url="dev.joshsamuels.co/error")
     else:
         email = result["email"]
-        user = db.query_eng(User).filter(
-            User.email == email).first()
+        user = db.query_eng(User).filter(User.email == email).first()
         if user is None:
-            return RedirectResponse(url="https://joshsamuels.co/error")
+            return RedirectResponse(url="https://dev.joshsamuels.co/error")
         user.is_verified = True
         db.update(user)
-        
-    return  RedirectResponse(url="https://joshsamuels.co/success")
+
+    return RedirectResponse(url="https://dev.joshsamuels.co/success")
+
 
 @router.get("/resened_verification_mail")
-async def resend_verification_mail(http_request: Request, email: EmailStr, db: Session = Depends(load)):
+async def resend_verification_mail(
+    http_request: Request, email: EmailStr, db: Session = Depends(load)
+):
     """
     Resend verification email endpoint.
 
@@ -109,13 +112,15 @@ async def resend_verification_mail(http_request: Request, email: EmailStr, db: S
     """
     user = db.query_eng(User).filter(User.email == email).first()
     if user is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
-                            detail=[{"msg": "User not found."}])
-    
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail=[{"msg": "User not found."}]
+        )
+
     user = db.query_eng(User).filter(User.id == user.id).first()
     message = await send_verification_mail(user.email, http_request, user)
 
     return {"message": message}
+
 
 @router.post("/logout")
 def logout(response: Response):
@@ -129,14 +134,14 @@ def logout(response: Response):
 
     Returns:
     - dict: A dictionary containing a success message.
-    """     
+    """
     # Clear access cookies
     delete_access_cookies(response)
 
     # Return a success message
     return {"detail": "Logged out successfully"}
 
+
 @router.get("/me/", response_model=ShowCustomer)
 def me(user: ShowCustomer = Depends(get_current_user)):
     return user
-
