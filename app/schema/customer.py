@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 
 import re
-from datetime import date
+from datetime import date, datetime
+from typing import List
 
-from pydantic import BaseModel, EmailStr, SecretStr, model_validator
+from pydantic import BaseModel, EmailStr, SecretStr, field_validator, model_validator
 
 from app.models.customer import GenderEnum
 
@@ -51,30 +52,58 @@ class ShowCustomer(BaseModel):
     email: EmailStr
     phone: str
     gender: GenderEnum | None
-    date_of_birth: date | None
+    date_of_birth: str | None
+
+    @field_validator("date_of_birth")
+    @classmethod
+    def validate_dob(cls, value):
+        if value is not None:
+            try:
+                datetime.strptime(value, "%B %d")
+            except ValueError:
+                raise ValueError("Invalid date of birth format. Please use 'Month Day'")
+        return value
+
+    class Config:
+        from_attributes = True
+
+
+class UpdateCustomer(BaseModel):
+    date_of_birth: str | None
+    gender: GenderEnum | None
+    phone: str
+    # address: str | None
+
+    @field_validator("date_of_birth")
+    @classmethod
+    def validate_dob(cls, value):
+        if value is not None:
+            try:
+                datetime.strptime(value, "%B %d")
+            except ValueError:
+                raise ValueError("Invalid date of birth format. Please use 'Month Day'")
+        return value
+
+    class Config:
+        from_attributes = True
 
 
 class UpdateMeasurement(BaseModel):
-    round_head: float
     neck: float
     shoulder: float
+    arm_hole: float
     sleeve: float
-    flexed_biceps: float
-    wrist: float
     back: float
     front_chest: float
-    chest: float
-    stomach: float
-    hip: float
+    round_chest: float
     waist: float
+    hip: float
     crotch: float
     thigh: float
     knee: float
     ankle: float
     pant_length: float
-    inseam: float
-    # front_view_image: str
-    # side_view_image: str
+    images: List[str]
 
     class Config:
         from_attributes = True
