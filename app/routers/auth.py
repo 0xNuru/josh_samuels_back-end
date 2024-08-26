@@ -142,6 +142,6 @@ def logout(response: Response):
     return {"detail": "Logged out successfully"}
 
 
-@router.get("/me/", response_model=ShowCustomer)
+@router.get("/me/")
 def me(user: ShowCustomer = Depends(get_current_user)):
     return user

@@ -11,3 +11,13 @@ class CreateProduct(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class CreateFabric(BaseModel):
+    name: str
+    price: float
+    category: str
+    images: List[str]
+
+    class Config:
+        from_attributes = True
