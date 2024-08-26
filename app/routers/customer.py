@@ -15,6 +15,7 @@ from app.schema.customer import (
     CreateCart,
     CreateCustomer,
     ShowCustomer,
+    UpdateCustomer,
     UpdateMeasurement,
 )
 from app.utils import auth
@@ -161,3 +162,17 @@ def get_profile(
         **user.__dict__,
         **customer.__dict__,
     }
+
+
+@router.patch("/update_profile", status_code=status.HTTP_200_OK)
+def update_profile(
+    request: UpdateCustomer,
+    db: Session = Depends(load),
+    user: User = Depends(auth.get_current_user),
+):
+    customer = db.query_eng(Customer).filter(Customer.id == user.id).first()
+    for field, value in request.model_dump(exclude_unset=True).items():
+        setattr(customer, field, value)
+
+    db.add(customer)
+    return {"message": "Profile updated successfully!"}
