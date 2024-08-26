@@ -88,7 +88,7 @@ class UpdateCustomer(BaseModel):
         from_attributes = True
 
 
-class UpdateMeasurement(BaseModel):
+class MeasurementSchema(BaseModel):
     neck: float
     shoulder: float
     arm_hole: float

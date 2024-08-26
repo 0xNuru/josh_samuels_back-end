@@ -16,7 +16,7 @@ from app.schema.customer import (
     CreateCustomer,
     ShowCustomer,
     UpdateCustomer,
-    UpdateMeasurement,
+    MeasurementSchema,
 )
 from app.utils import auth
 
@@ -81,7 +81,7 @@ async def register(
 
 @router.patch("/update_measurement", status_code=status.HTTP_200_OK)
 def update_measurement(
-    request: UpdateMeasurement,
+    request: MeasurementSchema,
     db: Session = Depends(load),
     user: User = Depends(auth.get_current_user),
 ):
@@ -128,6 +128,20 @@ def update_measurement(
         new_measurements = Measurement(customer_id=user.id, **request.model_dump())
         db.add(new_measurements)
         return new_measurements
+
+
+@router.get(
+    "/get_measurements",
+    response_model=MeasurementSchema,
+    status_code=status.HTTP_200_OK,
+)
+def get_measurements(
+    db: Session = Depends(load), user: User = Depends(auth.get_current_user)
+):
+    measurement = (
+        db.query_eng(Measurement).filter(Measurement.customer_id == user.id).first()
+    )
+    return measurement
 
 
 @router.post("/add_to_cart", status_code=status.HTTP_201_CREATED)
