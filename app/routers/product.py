@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from app.config.config import settings
 from app.engine.load import load
+from app.models.fabric import Fabric
 from app.models.product import Product
 from app.models.user import User
 from app.schema.product import CreateFabric, CreateProduct
@@ -160,7 +161,7 @@ def add_fabric(
                 status_code=400, detail=f"Failed to process image {index+1}: {str(e)}"
             )
 
-    new_fabric = Product(
+    new_fabric = Fabric(
         name=request.name,
         price=request.price,
         category=request.category,
