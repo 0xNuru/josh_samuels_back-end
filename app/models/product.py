@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Float, Integer, LargeBinary, String
+from sqlalchemy import Column, Float, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 
