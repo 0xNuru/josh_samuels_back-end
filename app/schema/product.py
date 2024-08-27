@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import List
 
 
-class CreateProduct(BaseModel):
+class ProductSchema(BaseModel):
     name: str
     price: float
     description: str

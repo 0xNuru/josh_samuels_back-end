@@ -12,7 +12,7 @@ from app.models.fabric import Fabric
 from app.models.fabric_price import FabricPrice
 from app.models.product import Product
 from app.models.user import User
-from app.schema.product import CreateProduct, FabricPriceData, FabricSchema
+from app.schema.product import ProductSchema, FabricPriceData, FabricSchema
 from app.utils import auth
 
 
@@ -28,7 +28,7 @@ s3_client = boto3.client(
 
 @router.post("/add_product", status_code=status.HTTP_201_CREATED)
 def add_product(
-    request: CreateProduct,
+    request: ProductSchema,
     db: Session = Depends(load),
     user: User = Depends(auth.check_authorization("admin")),
 ):
@@ -39,7 +39,7 @@ def add_product(
     to AWS S3. The resulting image URLs are then stored in the database along with the product details.
 
     Args:
-        request (CreateProduct): A Pydantic model that includes the following fields:
+        request (ProductSchema): A Pydantic model that includes the following fields:
             - name (str): The name of the product.
             - price (float): The price of the product.
             - description (str): A description of the product.
@@ -105,6 +105,14 @@ def get_products(db: Session = Depends(load)):
         List[Product]: A list of all products in the database.
     """
     return db.query_eng(Product).all()
+
+
+@router.get("/get_product/{id}")
+def get_product(
+    id: str,
+    db: Session = Depends(load),
+):
+    return db.query_eng(Product).filter(Product.id == id).first()
 
 
 @router.post("/add_fabric", status_code=status.HTTP_201_CREATED)
