@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from sqlalchemy import Column, String, Float, ForeignKey
+from sqlalchemy.ext.mutable import MutableList
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 
@@ -26,6 +27,6 @@ class Measurement(BaseModel, Base):
     knee = Column(Float, nullable=True)
     ankle = Column(Float, nullable=True)
     pant_length = Column(Float, nullable=True)
-    images = Column(JSONB, nullable=True)
+    images = Column(MutableList.as_mutable(JSONB), nullable=True)
 
     customer = relationship("Customer", back_populates="measurement")

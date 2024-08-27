@@ -89,21 +89,21 @@ class UpdateCustomer(BaseModel):
 
 
 class MeasurementSchema(BaseModel):
-    neck: float
-    shoulder: float
-    arm_hole: float
-    sleeve: float
-    back: float
-    front_chest: float
-    round_chest: float
-    waist: float
-    hip: float
-    crotch: float
-    thigh: float
-    knee: float
-    ankle: float
-    pant_length: float
-    images: List[str]
+    neck: float | None
+    shoulder: float | None
+    arm_hole: float | None
+    sleeve: float | None
+    back: float | None
+    front_chest: float | None
+    round_chest: float | None
+    waist: float | None
+    hip: float | None
+    crotch: float | None
+    thigh: float | None
+    knee: float | None
+    ankle: float | None
+    pant_length: float | None
+    images: List[str] | None
 
     class Config:
         from_attributes = True

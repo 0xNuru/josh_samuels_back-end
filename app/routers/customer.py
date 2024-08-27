@@ -2,10 +2,14 @@
 
 import base64
 import binascii
+import uuid
+
+import boto3
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
+from app.config.config import settings
 from app.engine.load import load
 from app.models.measurements import Measurement
 from app.models.user import User
@@ -22,6 +26,12 @@ from app.utils import auth
 
 
 router = APIRouter(prefix="/customer", tags=["Customer Management"])
+s3_client = boto3.client(
+    "s3",
+    region_name=settings.S3_REGION,
+    aws_access_key_id=settings.S3_ACCESS_KEY,
+    aws_secret_access_key=settings.S3_SECRET_KEY,
+)
 
 
 @router.post("/register", status_code=status.HTTP_201_CREATED)
@@ -107,25 +117,76 @@ def update_measurement(
         db.query_eng(Measurement).filter(Measurement.customer_id == user.id).first()
     )
     if measurements:
+        image_urls = measurements.images or []
+        print(image_urls)
         for key, value in request.model_dump(exclude_unset=True).items():
             if value not in (None, ""):
-                if key == "image":
-                    if value.startswith("data:image") and ";base64," in value:
-                        header, value = value.split(";base64,")
-                    # convert base64 image to binary
-                    try:
-                        value = base64.b64decode(value)
-                        setattr(measurements, "image_header", header)
-                    except binascii.Error:
-                        raise HTTPException(
-                            status_code=400,
-                            detail=[{"msg": "Invalid base64-encoded string for image"}],
-                        )
-                setattr(measurements, key, value)
+                if key == "images":
+                    for index, image_base64 in enumerate(value):
+                        if image_base64.startswith("data:image"):
+                            try:
+                                header, image_data = image_base64.split(";base64,")
+                                file_extension = header.split("/")[1]
+                                image_data = base64.b64decode(image_data)
+                                clean_email = user.email.replace(" ", "_")
+                                unique_filename = f"{clean_email + str(uuid.uuid4())[:6]}.{file_extension}"
+
+                                s3_client.put_object(
+                                    Bucket=settings.S3_BUCKET_NAME,
+                                    Key=unique_filename,
+                                    Body=image_data,
+                                    ContentType=f"image/{file_extension}",
+                                )
+
+                                file_url = f"https://{settings.S3_BUCKET_NAME}.s3.{settings.S3_REGION}.amazonaws.com/{unique_filename}"
+                                image_urls.append(file_url)
+                                print("in loop after apppend")
+                                print(image_urls)
+
+                            except Exception as e:
+                                raise HTTPException(
+                                    status_code=400,
+                                    detail=f"Failed to process image {index+1}: {str(e)}",
+                                )
+                    setattr(measurements, key, image_urls)
+                else:
+                    setattr(measurements, key, value)
         db.add(measurements)
+        db.refresh(measurements)
         return measurements
     else:
-        new_measurements = Measurement(customer_id=user.id, **request.model_dump())
+        image_urls = []
+        for index, image_base64 in enumerate(request.images):
+            try:
+                header, image_data = image_base64.split(";base64,")
+                file_extension = header.split("/")[1]
+                image_data = base64.b64decode(image_data)
+                clean_email = user.email.replace(" ", "_")
+                unique_filename = (
+                    f"{clean_email + str(uuid.uuid4())[:6]}.{file_extension}"
+                )
+
+                s3_client.put_object(
+                    Bucket=settings.S3_BUCKET_NAME,
+                    Key=unique_filename,
+                    Body=image_data,
+                    ContentType=f"image/{file_extension}",
+                )
+
+                # Construct the file URL
+                file_url = f"https://{settings.S3_BUCKET_NAME}.s3.{settings.S3_REGION}.amazonaws.com/{unique_filename}"
+                image_urls.append(file_url)
+
+            except Exception as e:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Failed to process image {index+1}: {str(e)}",
+                )
+        new_measurements = Measurement(
+            customer_id=user.id,
+            images=image_urls,
+            **request.model_dump(exclude="images"),
+        )
         db.add(new_measurements)
         return new_measurements
 
