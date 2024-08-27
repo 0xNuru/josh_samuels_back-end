@@ -3,7 +3,17 @@ from typing import List
 import uuid
 
 import boto3
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from botocore.exceptions import NoCredentialsError, PartialCredentialsError
+
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import joinedload, Session
 
 from app.config.config import settings
@@ -217,3 +227,41 @@ def get_fabrics(db: Session = Depends(load)):
         fabric_list.append(fabric_data)
 
     return fabric_list
+
+
+@router.post("/upload_image", status_code=status.HTTP_201_CREATED)
+async def upload_image(
+    file: UploadFile = File(...),
+    file_name: str = Form(...),
+    user: User = Depends(auth.check_authorization("admin")),
+):
+    try:
+        file_extension = file.filename.split(".")[-1]
+        unique_filename = f"{file_name}_{str(uuid.uuid4())[:6]}.{file_extension}"
+
+        s3_client.put_object(
+            Bucket=settings.S3_BUCKET_NAME,
+            Key=unique_filename,
+            Body=file.file,
+            ContentType=file.content_type,
+        )
+
+        file_url = f"https://{settings.S3_BUCKET_NAME}.s3.{settings.S3_REGION}.amazonaws.com/{unique_filename}"
+
+        return {"url": file_url}
+
+    except NoCredentialsError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="AWS credentials not found.",
+        )
+    except PartialCredentialsError:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Incomplete AWS credentials.",
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"An error occurred while uploading the image: {str(e)}",
+        )
