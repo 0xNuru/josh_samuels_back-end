@@ -6,7 +6,7 @@ class ProductSchema(BaseModel):
     name: str
     price: float
     description: str
-    category: str
+    category_id: str
     images: List[str]
 
     class Config:
@@ -14,7 +14,7 @@ class ProductSchema(BaseModel):
 
 
 class FabricPriceData(BaseModel):
-    product_id: str
+    product_category: str
     price: float
 
     class Config:
@@ -29,3 +29,7 @@ class FabricSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class ProductCategorySchema(BaseModel):
+    name: str

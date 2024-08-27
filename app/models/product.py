@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Float, String
+from sqlalchemy import Column, Float, ForeignKey, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import JSONB
 
@@ -13,8 +13,8 @@ class Product(BaseModel, Base):
     name = Column(String, nullable=False)
     price = Column(Float, nullable=False)
     description = Column(String, nullable=True)
-    category = Column(String, nullable=True)
+    category_id = Column(String, ForeignKey("product_categories.id"))
     images = Column(JSONB, nullable=True, default=lambda: [DEFAULT_STOCK_IMAGE_URL])
 
     cart = relationship("Cart", back_populates="product")
-    prices = relationship("FabricPrice", back_populates="product")
+    category = relationship("ProductCategory", back_populates="products")

@@ -21,8 +21,14 @@ from app.engine.load import load
 from app.models.fabric import Fabric
 from app.models.fabric_price import FabricPrice
 from app.models.product import Product
+from app.models.product_category import ProductCategory
 from app.models.user import User
-from app.schema.product import ProductSchema, FabricPriceData, FabricSchema
+from app.schema.product import (
+    ProductCategorySchema,
+    ProductSchema,
+    FabricPriceData,
+    FabricSchema,
+)
 from app.utils import auth
 
 
@@ -34,6 +40,30 @@ s3_client = boto3.client(
     aws_access_key_id=settings.S3_ACCESS_KEY,
     aws_secret_access_key=settings.S3_SECRET_KEY,
 )
+
+
+@router.post("/add_category", status_code=status.HTTP_201_CREATED)
+def add_category(
+    request: ProductCategorySchema,
+    db: Session = Depends(load),
+    user: User = Depends(auth.check_authorization("admin")),
+):
+    """
+    Adds a new product category to the database.
+
+    Args:
+        request (ProductCategorySchema): A Pydantic model that includes the following field:
+            - name (str): The name of the product category.
+
+        db (Session): SQLAlchemy database session used for querying and committing changes.
+        user (User): The authenticated user making the request, which must have 'admin' privileges.
+
+    Returns:
+        ProductCategory: The newly created product category.
+    """
+    new_category = ProductCategory(name=request.name)
+    db.add(new_category)
+    return new_category
 
 
 @router.post("/add_product", status_code=status.HTTP_201_CREATED)
@@ -73,7 +103,7 @@ def add_product(
             file_extension = header.split("/")[1]
             image_data = base64.b64decode(image_data)
             clean_name = request.name.replace(" ", "_")
-            clean_category = request.category.replace(" ", "_")
+            clean_category = request.category_id.replace(" ", "_")
             unique_filename = f"{clean_name + clean_category + str(uuid.uuid4())[:6]}.{file_extension}"
 
             s3_client.put_object(
@@ -91,12 +121,21 @@ def add_product(
             raise HTTPException(
                 status_code=400, detail=f"Failed to process image {index+1}: {str(e)}"
             )
+    product_category = (
+        db.query_eng(ProductCategory)
+        .filter(ProductCategory.id == request.category_id)
+        .first()
+    )
+    if not product_category:
+        raise HTTPException(
+            status_code=400, detail=f"Category '{request.category_id}' does not exist."
+        )
 
     new_product = Product(
         name=request.name,
         description=request.description,
         price=request.price,
-        category=request.category,
+        category_id=product_category.id,
         images=image_urls,
     )
     db.add(new_product)
@@ -180,17 +219,13 @@ def add_fabric(
                 status_code=400, detail=f"Failed to process image {index+1}: {str(e)}"
             )
 
-    new_fabric = Fabric(
-        name=request.name,
-        category=request.category,
-        images=image_urls,
-    )
+    new_fabric = Fabric(name=request.name, category=request.category, images=image_urls)
     db.add(new_fabric)
 
     for price_data in request.prices:
         fabric_price = FabricPrice(
             fabric_id=new_fabric.id,
-            product_id=price_data.product_id,
+            product_category_id=price_data.product_category,
             price=price_data.price,
         )
         db.add(fabric_price)
@@ -204,7 +239,7 @@ def add_fabric(
 def get_fabrics(db: Session = Depends(load)):
     fabrics = (
         db.query_eng(Fabric)
-        .options(joinedload(Fabric.prices).joinedload(FabricPrice.product))
+        .options(joinedload(Fabric.prices).joinedload(FabricPrice.product_category))
         .all()
     )
     print(fabrics)
@@ -214,7 +249,9 @@ def get_fabrics(db: Session = Depends(load)):
     fabric_list = []
     for fabric in fabrics:
         prices = [
-            FabricPriceData(product_id=price.product.name, price=price.price)
+            FabricPriceData(
+                product_category=price.product_category_id, price=price.price
+            )
             for price in fabric.prices
         ]
 
