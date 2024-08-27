@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from app.config.config import settings
 from app.engine.load import load
 from app.models.fabric import Fabric
+from app.models.fabric_price import FabricPrice
 from app.models.product import Product
 from app.models.user import User
 from app.schema.product import CreateFabric, CreateProduct
@@ -163,9 +164,17 @@ def add_fabric(
 
     new_fabric = Fabric(
         name=request.name,
-        price=request.price,
         category=request.category,
         images=image_urls,
     )
     db.add(new_fabric)
+
+    for price_data in request.prices:
+        fabric_price = FabricPrice(
+            fabric_id=new_fabric.id,
+            product_id=price_data.product_id,
+            price=price_data.price,
+        )
+        db.add(fabric_price)
+
     return new_fabric

@@ -44,7 +44,7 @@ class DBStorage:
             raise
 
         self.__session = None
-    
+
     def all(self, cls=None):
         """
         Desc:
@@ -169,6 +169,10 @@ class DBStorage:
 
     def refresh(self, obj):
         self.__session.refresh(obj)
+
+    def flush(self):
+        """Flushes the current session, ensuring any pending changes are sent to the database."""
+        self.__session.flush()
 
     def close(self):
         """

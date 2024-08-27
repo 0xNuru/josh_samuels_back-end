@@ -17,3 +17,4 @@ class Product(BaseModel, Base):
     images = Column(JSONB, nullable=True, default=lambda: [DEFAULT_STOCK_IMAGE_URL])
 
     cart = relationship("Cart", back_populates="product")
+    prices = relationship("FabricPrice", back_populates="product")
