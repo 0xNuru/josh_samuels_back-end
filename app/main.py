@@ -23,6 +23,6 @@ def hello():
     return {"message": "Hello, World!"}
 
 
-app.include_router(customer.router)
 app.include_router(auth.router)
+app.include_router(customer.router)
 app.include_router(product.router)

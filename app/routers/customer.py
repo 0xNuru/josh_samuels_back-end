@@ -251,3 +251,24 @@ def update_profile(
 
     db.add(customer)
     return {"message": "Profile updated successfully!"}
+
+
+@router.get("/all")
+def get_all_customers(
+    db: Session = Depends(load), user: User = Depends(auth.check_authorization("admin"))
+):
+    return db.query_eng(Customer).all()
+
+
+@router.get("/measurement/{id}")
+def get_measurement_by_id(
+    id: str,
+    db: Session = Depends(load),
+    user: User = Depends(auth.check_authorization("admin")),
+):
+    measurement = (
+        db.query_eng(Measurement).filter(Measurement.customer_id == id).first()
+    )
+    if measurement is None:
+        raise HTTPException(status_code=404, detail="Measurement not found")
+    return measurement
