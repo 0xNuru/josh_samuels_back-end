@@ -21,7 +21,7 @@ class FabricPriceData(BaseModel):
         from_attributes = True
 
 
-class CreateFabric(BaseModel):
+class FabricSchema(BaseModel):
     name: str
     category: str
     prices: List[FabricPriceData]

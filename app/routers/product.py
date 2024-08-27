@@ -4,7 +4,7 @@ import uuid
 
 import boto3
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import joinedload, Session
 
 from app.config.config import settings
 from app.engine.load import load
@@ -12,7 +12,7 @@ from app.models.fabric import Fabric
 from app.models.fabric_price import FabricPrice
 from app.models.product import Product
 from app.models.user import User
-from app.schema.product import CreateFabric, CreateProduct
+from app.schema.product import CreateProduct, FabricPriceData, FabricSchema
 from app.utils import auth
 
 
@@ -109,7 +109,7 @@ def get_products(db: Session = Depends(load)):
 
 @router.post("/add_fabric", status_code=status.HTTP_201_CREATED)
 def add_fabric(
-    request: CreateFabric,
+    request: FabricSchema,
     db: Session = Depends(load),
     user: User = Depends(auth.check_authorization("admin")),
 ):
@@ -178,3 +178,34 @@ def add_fabric(
         db.add(fabric_price)
 
     return new_fabric
+
+
+@router.get(
+    "/fabrics", response_model=List[FabricSchema], status_code=status.HTTP_200_OK
+)
+def get_fabrics(db: Session = Depends(load)):
+    fabrics = (
+        db.query_eng(Fabric)
+        .options(joinedload(Fabric.prices).joinedload(FabricPrice.product))
+        .all()
+    )
+    print(fabrics)
+    if not fabrics:
+        raise HTTPException(status_code=404, detail="No fabrics found")
+
+    fabric_list = []
+    for fabric in fabrics:
+        prices = [
+            FabricPriceData(product_id=price.product.name, price=price.price)
+            for price in fabric.prices
+        ]
+
+        fabric_data = FabricSchema(
+            name=fabric.name,
+            category=fabric.category,
+            prices=prices,
+            images=fabric.images,
+        )
+        fabric_list.append(fabric_data)
+
+    return fabric_list
