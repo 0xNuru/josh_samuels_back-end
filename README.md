@@ -108,3 +108,7 @@ S3_SECRET_KEY=""
 # Paystack Configuration
 PAYSTACK_SECRET_KEY=""
 ```
+
+### Artchitecture
+
+![Application Architecture](https://josh-samuels-photos.s3.eu-north-1.amazonaws.com/architecture_1a6281.png)
