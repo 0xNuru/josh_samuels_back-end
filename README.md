@@ -77,11 +77,11 @@ The **Josh Samuels E-commerce Platform** backend is a robust and scalable applic
 To run the backend application, you need to set up a `.env` file in the root directory of your project. This file contains critical configuration settings for connecting to services like your database, AWS, and Paystack. Below is the format for the `.env` file:
 
 ```env
-# Database Configuration
+# Example Database Configuration
 DB_USER="postgres"
-DB_PASSWORD="josh_samuels001!"
+DB_PASSWORD="josh_samuels_Password00!"
 DB_NAME="josh_samuels"
-DB_HOST="localhost"
+DB_HOST="host"
 DB_PORT=5432
 DB_URL="postgresql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}"
 
@@ -93,9 +93,9 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30000
 REFRESH_TOKEN_EXPIRE_MINUTES=300
 
 # Email Server Settings
-EMAIL_HOST=us2.smtp.mailhostbox.com
+EMAIL_HOST=
 EMAIL_PORT=587
-EMAIL_USERNAME=n.tech
+EMAIL_USERNAME=
 EMAIL_PASSWORD=""  # Replace with your email password
 EMAIL_FROM=@.tech
 
@@ -103,7 +103,7 @@ EMAIL_FROM=@.tech
 S3_BUCKET_NAME="josh-photos"
 S3_REGION="eu-north-1"
 S3_ACCESS_KEY=""
-S3_SECRET_KEY="++rVu1L"
+S3_SECRET_KEY=""
 
 # Paystack Configuration
 PAYSTACK_SECRET_KEY=""
