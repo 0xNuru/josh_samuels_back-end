@@ -59,7 +59,7 @@ def add_category(
         user (User): The authenticated user making the request, which must have 'admin' privileges.
 
     Returns:
-        ProductCategory: The newly created product category.
+        ProductCategory: The newly created product category..
     """
     new_category = ProductCategory(name=request.name)
     db.add(new_category)
