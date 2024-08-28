@@ -20,9 +20,8 @@ router = APIRouter(prefix="/payment", tags=["Payment Management"])
 def initialize_payment(request: Order_id, db: Session = Depends(load)):
     order = db.query_eng(Cart).filter(Cart.id == request).first()
     product = db.query_eng(Product).filter(Product.id == order.product_id).first()
-    access_code = accept_payments(
-        email=order.email, order_id=order.id, amount=product.price
-    )
+    price = product.price * order.quantity
+    access_code = accept_payments(email=order.email, order_id=order.id, amount=price)
     if access_code is None:
         return HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid request"
@@ -68,7 +67,7 @@ async def paystack_webhook(request: Request, db: Session = Depends(load)):
             # Update order status and other details
             order.status = "paid"
             order.paid_at = data.get("paid_at")
-            order.amount_paid = data.get("amount")
+            order.amount_paid = data.get("amount") / 100
 
             db.add(order)
 

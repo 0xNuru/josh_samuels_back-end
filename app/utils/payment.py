@@ -11,7 +11,7 @@ def accept_payments(email, amount, order_id) -> str:
     }
     data = {
         "email": email,
-        "amount": amount,
+        "amount": amount * 100,
         "reference": order_id,
     }
 
