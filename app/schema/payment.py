@@ -1,9 +1,8 @@
 from pydantic import BaseModel, EmailStr
 
 
-class Payments(BaseModel):
-    email: EmailStr
-    amount: str
+class Order_id(BaseModel):
+    id: str
 
     class Config:
         from_attributes = True
