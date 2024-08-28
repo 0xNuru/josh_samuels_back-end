@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.routers import customer, auth, product
+from app.routers import customer, auth, product, payment
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -26,3 +26,4 @@ def hello():
 app.include_router(auth.router)
 app.include_router(customer.router)
 app.include_router(product.router)
+app.include_router(payment.router)

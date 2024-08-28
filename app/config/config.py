@@ -41,5 +41,8 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY: str
     S3_SECRET_KEY: str
 
+    # paystack
+    PAYSTACK_SECRET_KEY: str
+
 
 settings = Settings()
