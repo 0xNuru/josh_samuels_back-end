@@ -2,6 +2,7 @@
 
 import base64
 import binascii
+from typing import Optional
 import uuid
 
 import boto3
@@ -253,14 +254,14 @@ def update_profile(
     return {"message": "Profile updated successfully!"}
 
 
-@router.get("/all")
+@router.get("/all", status_code=status.HTTP_200_OK)
 def get_all_customers(
     db: Session = Depends(load), user: User = Depends(auth.check_authorization("admin"))
 ):
     return db.query_eng(Customer).all()
 
 
-@router.get("/measurement/{id}")
+@router.get("/measurement/{id}", status_code=status.HTTP_200_OK)
 def get_measurement_by_id(
     id: str,
     db: Session = Depends(load),
@@ -272,3 +273,13 @@ def get_measurement_by_id(
     if measurement is None:
         raise HTTPException(status_code=404, detail="Measurement not found")
     return measurement
+
+
+@router.get("/cart", status_code=status.HTTP_200_OK)
+def get_cart(
+    db: Session = Depends(load),
+    user: Optional[User] = Depends(auth.get_current_user),
+):
+    if user:
+        cart = db.query_eng(Cart).filter(Cart.customer_id == user.id).first()
+        return cart

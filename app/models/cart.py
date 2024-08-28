@@ -11,7 +11,7 @@ class Cart(BaseModel, Base):
     )
     product_id = Column(String, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, nullable=False)
-    stauts = Column(String, nullable=True)
+    status = Column(String, nullable=True)
     paid_at = Column(String, nullable=True)
     amount_paid = Column(Integer, nullable=True)
 
