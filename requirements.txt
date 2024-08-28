@@ -25,5 +25,5 @@ gunicorn
 #AWS SDK for Python
 boto3
 
-# HTTP library
+# HTTP library 
 requests
